@@ -1,0 +1,367 @@
+---
+swagger: "2.0"
+info:
+  description: API for creating and retrieving tag snippets
+  version: 0.1.0
+  title: TagGen API
+  contact:
+    email: dan@djayeassoc.com
+  license:
+    name: GNU GPL 3.0-only
+    url: https://www.gnu.org/licenses/gpl-3.0.txt
+host: virtserver.swaggerhub.com
+basePath: /danjaye/TagGen/1.0.0
+tags:
+- name: admins
+  description: Admin-only calls
+- name: developers
+  description: Operations available to regular developers
+schemes:
+- http
+paths:
+  /vendors:
+    get:
+      tags:
+      - developers
+      summary: search vendors
+      description: |
+        By passing in the appropriate options, you can search for
+        vendors
+      operationId: searchVendor
+      produces:
+      - application/json
+      parameters:
+      - name: searchString
+        in: query
+        description: pass an optional search string for looking up a vendor
+        required: false
+        type: string
+      - name: skip
+        in: query
+        description: number of vendors to skip for pagination
+        required: false
+        type: integer
+        minimum: 0
+        format: int32
+      - name: limit
+        in: query
+        description: maximum number of vendors to return
+        required: false
+        type: integer
+        maximum: 50.0
+        minimum: 0
+        format: int32
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Vendor'
+        400:
+          description: bad input parameter
+    put:
+      tags:
+      - admins
+      summary: adds a vendor
+      description: Adds a vendor to the system
+      operationId: addVendor
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: vendor
+        description: vendor to add
+        required: false
+        schema:
+          $ref: '#/definitions/Vendor'
+      responses:
+        201:
+          description: vendor created
+        400:
+          description: invalid input, object invalid
+        409:
+          description: vendor with that name already exists
+  /vendors/{id}:
+    post:
+      tags:
+      - admins
+      summary: replaces a vendor
+      description: replaces a vendor
+      operationId: replaceVendor
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: pass the vendor Id which is being replaced
+        required: true
+        type: string
+        format: int32
+      - in: body
+        name: vendor
+        description: vendor to add
+        required: false
+        schema:
+          $ref: '#/definitions/Vendor'
+      responses:
+        201:
+          description: vendor replaced
+        400:
+          description: invalid input, object invalid
+        404:
+          description: vendor not found
+    delete:
+      tags:
+      - admins
+      summary: deletes a vendor
+      description: logically deletes a vendor
+      operationId: deleteVendor
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: pass the vendor Id which is being deleted
+        required: true
+        type: string
+        format: int32
+      responses:
+        204:
+          description: vendor deleted
+        404:
+          description: vendor not found
+  /vendors/{id}/tagdefs:
+    get:
+      tags:
+      - developers
+      summary: search vendor tag defs
+      description: |
+        By passing in the appropriate options, you can search for
+        vendor tag definitions
+      operationId: searchVendorTagDefs
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: pass the vendor Id for which a tag defs are being searched
+        required: true
+        type: string
+        format: int32
+      - name: searchString
+        in: query
+        description: pass an optional search string for looking up a tag definition
+        required: false
+        type: string
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TagDef'
+        400:
+          description: bad input parameter
+    put:
+      tags:
+      - admins
+      summary: adds a vendor tag definition
+      description: Adds a vendor tag definition to the system
+      operationId: addVendorTagDef
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: pass the vendor Id for which a tag def is being added
+        required: true
+        type: string
+        format: int32
+      - in: body
+        name: tagdef
+        description: vendor tag def to add
+        required: false
+        schema:
+          $ref: '#/definitions/TagDef'
+      responses:
+        201:
+          description: tag definition created
+        400:
+          description: invalid input, object invalid
+        404:
+          description: vendor not found
+        409:
+          description: tag definition with name already exists
+  /vendors/{id}/tagdefs/{tagDefId}:
+    post:
+      tags:
+      - admins
+      summary: replaces a vendor tag definition
+      description: Replaces a vendor tag definition in the system
+      operationId: replaceVendorTagDef
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: pass the vendor Id for which a tag def is being replaced
+        required: true
+        type: string
+        format: int32
+      - name: tagDefId
+        in: path
+        description: pass the tag def Id for which a tag def is being replaced
+        required: true
+        type: string
+        format: int32
+      - in: body
+        name: tagdef
+        description: vendor tag def to replace
+        required: false
+        schema:
+          $ref: '#/definitions/TagDef'
+      responses:
+        201:
+          description: tag definition created
+        400:
+          description: invalid input, object invalid
+        404:
+          description: vendor not found
+        409:
+          description: tag definition with name already exists
+  /vendors/{id}/tagdefs/{tagDefId}/tag:
+    get:
+      tags:
+      - developers
+      summary: generate a formatted tag snippet
+      description: |
+        By passing in the appropriate options, you can generate a custom Tag snippet
+      operationId: generateTag
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: pass the vendor Id for which a tag is being generated
+        required: true
+        type: string
+        format: int32
+      - name: tagDefId
+        in: path
+        description: pass the tag def Id for which a tag is being generated
+        required: true
+        type: string
+        format: int32
+      - name: substParams
+        in: query
+        description: pass a query string of substitition parameters
+        required: false
+        type: string
+      responses:
+        200:
+          description: generated Tag snippet
+          schema:
+            $ref: '#/definitions/FormattedTag'
+        400:
+          description: bad input parameter
+        404:
+          description: vendor or tag definition not found
+definitions:
+  Vendor:
+    type: object
+    required:
+    - name
+    - vendorURL
+    properties:
+      id:
+        type: string
+        format: int
+        example: "45"
+        description: Generated by server when created
+      name:
+        type: string
+        example: acme widget company
+      vendorURL:
+        type: string
+        format: url
+        example: www.acmewidgetcompany.com
+      dateAdded:
+        type: string
+        format: int32
+        example: 2016-08-29T09:12:33.001Z
+        description: Generated by server when created
+      dateDeleted:
+        type: string
+        format: int32
+        example: 2016-08-29T09:12:33.001Z
+        description: Generated by server when logically deleted
+    example:
+      vendorURL: www.acmewidgetcompany.com
+      name: acme widget company
+      id: "45"
+      dateAdded: 2016-08-29T09:12:33.001Z
+      dateDeleted: 2016-08-29T09:12:33.001Z
+  TagDef:
+    required:
+    - name
+    - template
+    properties:
+      id:
+        type: string
+        format: int32
+        example: "3"
+        description: Generated by server when created
+      name:
+        type: string
+        example: acme widget tag
+      version:
+        type: string
+        example: "1.0"
+      template:
+        type: string
+    example:
+      template: template
+      name: acme widget tag
+      id: "3"
+      version: "1.0"
+  FormattedTag:
+    required:
+    - id
+    - snippet
+    - tagDefId
+    properties:
+      id:
+        type: string
+        format: int32
+        example: "46"
+        description: vendor id
+      tagDefId:
+        type: string
+        format: int32
+        example: "3"
+        description: tag definition id
+      version:
+        type: string
+        example: "1.0"
+        description: tag definition version
+      snippet:
+        type: string
+      params:
+        type: string
+    example:
+      snippet: snippet
+      tagDefId: "3"
+      id: "46"
+      params: params
+      version: "1.0"
